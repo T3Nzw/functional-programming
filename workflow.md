@@ -39,7 +39,7 @@ std::cout << sqrt(20) << std::endl;
 shell_prompt> ghci <module1>.hs <module2>.hs ...
 ```
 
-```hs
+```
 shell_prompt> ghci
 GHCi, version 9.6.7: https://www.haskell.org/ghc/  :? for help
 ghci> :l <module1>.hs <module2>.hs ...  -- или :load ...
@@ -47,14 +47,14 @@ ghci> :l <module1>.hs <module2>.hs ...  -- или :load ...
 
 - повторно зареждане на предишно заредените модули
 
-```hs
+```
 ghci> :r
 ghci> :reload
 ```
 
 - тип на стойност/функция
 
-```hs
+```
 ghci> :type "abcd"
 "abcd" :: String
 ghci> :t even
@@ -63,7 +63,7 @@ even :: Integral a => a -> Bool
 
 - информация за функция/типов клас/тип данни
 
-```hs
+```
 ghci> :info even
 even :: Integral a => a -> Bool         -- Defined in ‘GHC.Real’
 ghci> :i Integral
@@ -75,13 +75,13 @@ class (Real a, Enum a) => Integral a where
 
 - изход от GHCi
 
-```hs
+```
 ghci> :q  -- или :quit
 ```
 
 - импортиране на модули
 
-```hs
+```
 ghci> Data.Char.ord 'a'
 97
 ghci> import Data.Char
@@ -91,7 +91,7 @@ ghci> ord 'a'
 
 - дефиниции
 
-```hs
+```
 ghci> let x = 42
 ghci> y = 100
 ghci> x + y
