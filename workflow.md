@@ -35,7 +35,7 @@ std::cout << sqrt(20) << std::endl;
 
 - зареждане на модули
 
-```hs
+```
 shell_prompt> ghci <module1>.hs <module2>.hs ...
 ```
 
