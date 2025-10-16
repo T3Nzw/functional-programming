@@ -127,7 +127,7 @@ $$
  a_{i} =
    \begin{cases}
        0, & i = 0 \\
-       a_{i-1} - i, & a_{i-1} - i > 0 \land a_i - i \notin \{a_0, ..., a_i\} \\
+       a_{i-1} - i, & a_{i-1} - i > 0 \land a_{i-1} - i \notin \{a_0, ..., a_{i-1}\} \\
        a_{i-1} + i, & иначе \\
     \end{cases}
 \end{equation}
