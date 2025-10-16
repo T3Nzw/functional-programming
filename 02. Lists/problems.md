@@ -62,7 +62,7 @@ drop 4 [1..10]  -- [5,6,7,8,9,10]
 
 ```hs
 split ' ' "i love  programming in    haskell <3"
--- ["i", "love", "programming", "in", "haskell", "<3"]
+-- ["i","love","programming","in","haskell","<3"]
 ```
 
 ## Задача 07
@@ -124,10 +124,18 @@ pack "aaabbcddaa"
 
 $$
 \begin{equation}
- a_{i+1} =
+ a_{i} =
    \begin{cases}
-       a_i - i, & a_i - i > 0 \land a_i - i \notin \{a_0, ..., a_i\} \\
-       a_i + i, & иначе \\
+       0, & i = 0 \\
+       a_{i-1} - i, & a_{i-1} - i > 0 \land a_i - i \notin \{a_0, ..., a_i\} \\
+       a_{i-1} + i, & иначе \\
     \end{cases}
 \end{equation}
 $$
+
+Пример:
+
+```hs
+recaman 4  -- 2
+recaman 9  -- 21
+```
