@@ -145,7 +145,7 @@ gcd'' a 0 = abs a
 gcd'' 0 b = abs b
 gcd'' a b
   | a > b = gcd'' b (a `mod` b)
-  | otherwise = gcd a (b `mod` a)
+  | otherwise = gcd'' a (b `mod` a)
 
 -- >>> gcd' 16 8
 -- 8
