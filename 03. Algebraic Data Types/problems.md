@@ -84,7 +84,7 @@ cmpInt 7 1  -- GreaterThan
 - `myRev :: Pair a b -> Pair b a`;
 - `pairToTuple :: Pair a b -> (a,b)`;
 - `tupleToPair :: (a,b) -> Pair a b`;
-- `cmpPair :: (Ord a, Ord b) => Pair a b -> Ordering`, където `Ordering` е АТД от задача 04;
+- `cmpPair :: (Ord a, Ord b) => Pair a b -> Pair a b -> Ordering`, където `Ordering` е АТД от задача 04;
 - `pairsToList :: [Pair a b] -> Pair [a] [b]`.
 
 ## Задача 07
