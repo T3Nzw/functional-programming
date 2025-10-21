@@ -3,7 +3,6 @@ module Solutions where
 -- така можем да скрием дефинициите от стандартната библиотека,
 -- за да не clash-ват с тези, които ние пишем
 
-import Data.Type.Bool (Not)
 import Prelude hiding (Maybe (..), Ordering (..), repeat)
 
 repeat :: a -> [a]
@@ -26,14 +25,14 @@ fibs = fibs' 0 1
 -- >>> take 10 fibs
 -- [0,1,1,2,3,5,8,13,21,34]
 
-data Ordering = LessThan | Equal | GreatherThan
+data Ordering = LessThan | Equal | GreaterThan
   deriving (Show, Eq, Ord, Enum)
 
 cmpInt :: Int -> Int -> Ordering
 cmpInt x y
   | x < y = LessThan
   | x == y = Equal
-  | x > y = GreatherThan
+  | x > y = GreaterThan
 
 type Sides = Int
 
@@ -104,7 +103,7 @@ cmp :: (Ord a) => a -> a -> Ordering
 cmp x y
   | x < y = LessThan
   | x == y = Equal
-  | x > y = GreatherThan
+  | x > y = GreaterThan
 
 cmpPair :: (Ord a, Ord b) => Pair a b -> Pair a b -> Ordering
 cmpPair (Pair x1 y1) (Pair x2 y2) =
@@ -247,7 +246,7 @@ insert x (Set xs) = Set (insert' x xs)
       case cmp x y of
         Equal -> l
         LessThan -> x : y : ys
-        GreatherThan -> y : insert' x ys
+        GreaterThan -> y : insert' x ys
 
 -- >>> insert 10 set1
 -- Set [0,1,2,4,5,6,10]
@@ -331,7 +330,7 @@ intersect (Set xs) (Set ys) = Set (intersect' xs ys)
       case cmp x y of
         Equal -> x : intersect' xs ys
         LessThan -> intersect' xs l2
-        GreatherThan -> intersect' l1 ys
+        GreaterThan -> intersect' l1 ys
 
 -- >>> intersect set1 set2
 -- Set [1,2,4,5]
@@ -405,7 +404,7 @@ cmpKvp :: (Ord k) => (k, v) -> (k, v) -> Ordering
 cmpKvp (key1, _) (key2, _) = cmp key1 key2
 
 -- >>> cmpKvp (1,4) (-1,3)
--- GreatherThan
+-- GreaterThan
 
 elemKvp :: (Eq k) => (k, v) -> [(k, v)] -> Bool
 elemKvp _ [] = False
@@ -453,7 +452,7 @@ insertDict key value (Dict dict) = Dict (insert' key value dict)
       case cmp key key' of
         Equal -> (key, value) : kvps
         LessThan -> (key, value) : kvp : kvps
-        GreatherThan -> kvp : insert' key value kvps
+        GreaterThan -> kvp : insert' key value kvps
 
 -- >>> insertDict 1 "qw" dict1
 -- Dict [(0,"ff"),(1,"qw"),(3,"aa"),(6,"xyz"),(7,"rrs")]
@@ -518,7 +517,7 @@ merge (Dict kvps1) (Dict kvps2) = Dict (merge' kvps1 kvps2)
       case cmp key1 key2 of
         Equal -> kvp2 : merge' kvps1 kvps2
         LessThan -> kvp1 : merge' kvps1 l2
-        GreatherThan -> kvp2 : merge' l1 kvps2
+        GreaterThan -> kvp2 : merge' l1 kvps2
 
 dict2 :: Dict Int String
 dict2 =
