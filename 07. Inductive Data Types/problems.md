@@ -88,8 +88,8 @@ expr2 = Constant 2 :*: Variable "z"
 - `mapBT :: (a -> b) -> BinTree a -> BinTree b`;
 - `inorder :: BinTree a -> [a]`;
 - `preorder :: BinTree a -> [a]`;
-- `toBST :: [a] -> BinTree a`;
-- `isBalancedBST :: BinTree a -> Bool`.
+- `toBST :: Ord a => [a] -> BinTree a`;
+- `isBalancedBST :: (Ord a, Bounded a) => BinTree a -> Bool`.
 
 ## Задача 06 - контролно по ФП на КН2, 2024/2025г.
 
