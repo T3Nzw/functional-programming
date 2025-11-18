@@ -283,7 +283,7 @@ bst2 = toBST [6, 4, 2, 5, 1, 3]
 type Interval a = (a, a)
 
 in' :: (Ord a) => a -> Interval a -> Bool
-x `in'` (lower, upper) = lower <= x && x <= upper
+x `in'` (lower, upper) = lower <= x && x < upper
 
 isBST :: (Ord a, Bounded a) => BinTree a -> Bool
 isBST = helper (minBound, maxBound)
