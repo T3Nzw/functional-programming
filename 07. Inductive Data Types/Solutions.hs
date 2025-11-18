@@ -239,6 +239,7 @@ quicksort (x : xs) =
       gt = filter (> x) xs
    in quicksort leq ++ [x] ++ quicksort gt
 
+-- this is also balanced
 toBST :: (Ord a) => [a] -> BinTree a
 toBST lst = toBST' (length lst) $ quicksort lst
   where
