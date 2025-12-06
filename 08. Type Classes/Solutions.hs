@@ -74,8 +74,12 @@ instance (Ord a) => Ord (Down a) where
 data List a = Nil | Cons a (List a)
 
 instance (Show a) => Show (List a) where
-  show Nil = "()"
-  show xs = undefined
+  show xs = "(" ++ show' xs ++ ")"
+    where
+      show' :: (Show a) => List a -> String
+      show' Nil = ""
+      show' (Cons x Nil) = show x
+      show' (Cons x xs) = show x ++ "," ++ show' xs
 
 data NonEmpty a = a :| [a] deriving (Show, Eq)
 
@@ -147,7 +151,7 @@ instance Functor BinTree where
 instance Foldable BinTree where
   foldr _ nv Empty = nv
   foldr op nv (Node x l r) =
-    foldr op (x `op` foldr op nv l) r
+    foldr op (x `op` foldr op nv r) l
 
 class Brzozowski r where
   nullable :: r a -> Bool
