@@ -100,6 +100,7 @@ class (Applicative m) => Monad m where
   return :: a -> m a
   (>>=) :: m a -> (a -> m b) -> m b
   (>>) :: m a -> m b -> m b
+  lhs >> rhs = lhs >>= const rhs
 
 instance Monad Maybe where
   return :: a -> Maybe a
@@ -110,7 +111,8 @@ instance Monad Maybe where
   Just x >>= f = f x
 
   (>>) :: Maybe a -> Maybe b -> Maybe b
-  x >> y = y
+  Nothing >> _ = Nothing
+  _ >> rhs = rhs
 
 instance Monad (Either c) where
   return :: a -> Either c a
@@ -121,7 +123,8 @@ instance Monad (Either c) where
   Right y >>= f = f y
 
   (>>) :: Either c a -> Either c b -> Either c b
-  _ >> y = y
+  Left x >> _ = Left x
+  _ >> rhs = rhs
 
 instance Monad [] where
   return :: a -> [a]
@@ -133,7 +136,8 @@ instance Monad [] where
   (>>=) = flip concatMap
 
   (>>) :: [a] -> [b] -> [b]
-  _ >> ys = ys
+  [] >> _ = []
+  _ >> rhs = rhs
 
 data Pair a b = Pair a b
 
