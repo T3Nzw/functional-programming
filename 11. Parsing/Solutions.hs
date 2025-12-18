@@ -66,9 +66,6 @@ leaf x = Node x Empty Empty
 
 insert :: (Ord a) => a -> BST a -> BST a
 insert x Empty = leaf x
-insert x (Node root Empty Empty)
-  | x < root = Node root (leaf x) Empty
-  | otherwise = Node root Empty (leaf x)
 insert x (Node root l r)
   | x < root = Node root (insert x l) r
   | otherwise = Node root l (insert x r)
