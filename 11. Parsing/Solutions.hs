@@ -64,7 +64,7 @@ data BST a = Empty | Node a (BST a) (BST a)
 leaf :: a -> BST a
 leaf x = Node x Empty Empty
 
-insert :: (Ord a) => a -> BST a -> BST a
+insert :: Ord a => a -> BST a -> BST a
 insert x Empty = leaf x
 insert x (Node root l r)
   | x < root = Node root (insert x l) r
@@ -72,28 +72,28 @@ insert x (Node root l r)
 
 kthLargest :: Int -> BST a -> Maybe a
 kthLargest k bst = if k <= 0 then Nothing else evalState (go bst) k
-  where
-    go :: BST a -> State Int (Maybe a)
-    go Empty = pure Nothing
-    go (Node x l r) = do
-      lres <- go l
+ where
+  go :: BST a -> State Int (Maybe a)
+  go Empty = pure Nothing
+  go (Node x l r) = do
+    lres <- go l
 
-      case lres of
-        Just y -> pure $ Just y
-        Nothing -> do
-          modify (subtract 1)
-          cnt <- get
+    case lres of
+      Just y -> pure $ Just y
+      Nothing -> do
+        modify (subtract 1)
+        cnt <- get
 
-          if cnt == 0
-            then pure $ Just x
-            else go r
+        if cnt == 0
+          then pure $ Just x
+          else go r
 
-mkTree :: (Ord a) => [a] -> BST a
+mkTree :: Ord a => [a] -> BST a
 mkTree = go Empty
-  where
-    go :: (Ord a) => BST a -> [a] -> BST a
-    go acc [] = acc
-    go acc (x : xs) = go (insert x acc) xs
+ where
+  go :: Ord a => BST a -> [a] -> BST a
+  go acc [] = acc
+  go acc (x : xs) = go (insert x acc) xs
 
 bst1 :: BST Int
 bst1 = mkTree [5, 3, 7, 1, 3, 9, 12]
@@ -105,7 +105,7 @@ bst1 = mkTree [5, 3, 7, 1, 3, 9, 12]
 -- [Nothing,Just 1,Just 3,Just 3,Just 5,Just 7,Just 9,Just 12,Nothing,Nothing,Nothing]
 
 newtype ParseError = ParseError {getParseError :: String}
-  deriving (Show)
+  deriving Show
 
 newtype Parser a = MkParser {runParser :: String -> Either ParseError (a, String)}
 
@@ -180,8 +180,17 @@ data Term
 char :: Char -> Parser Char
 char c = sat (== c)
 
+-- >>> runParser (char 'a') "abcd"
+-- Right ('a',"bcd")
+
 lower :: Parser Char
 lower = sat isAsciiLower
+
+-- >>> runParser lower "abcd"
+-- Right ('a',"bcd")
+
+-- >>> runParser lower "Abcd"
+-- Left (ParseError {getParseError = "unexpected character 'A'"})
 
 upper :: Parser Char
 upper = sat isAsciiUpper
@@ -192,15 +201,51 @@ digit = sat isDigit
 underscore :: Parser Char
 underscore = char '_'
 
+-- разпознава непразни низове, които започват с главна буква,
+-- последвана от 0 или повече срещания на малка или голяма буква,
+-- цифра или долна черта
 variable :: Parser Term
 variable = Variable <$> liftA2 (:) upper (many (lower <|> upper <|> digit <|> underscore))
 
+not' :: Parser Term
+not' = char '!' >> Not <$> term
+
+-- >>> runParser not' "!Foo"
+-- Right (Not (Variable "Foo"),"")
+
+-- >>> runParser not' "!Foo & Bar"
+-- Right (Not (Variable "Foo" :&: Variable "Bar"),"")
+
+-- по горния начин правим оператора ! с най-нисък приоритет.
+-- няма да искаме нещо такова в общия случай, така че просто
+-- бихме могли да прочетем някакъв "атомарен" обект
 not :: Parser Term
-not = char '!' >> Not <$> term
+not = char '!' >> Not <$> token (variable <|> not <|> paren)
+
+-- >>> runParser not "!Foo & Bar"
+-- Right (Not (Variable "Foo"),"& Bar")
+
+-- горното е очакван ефект, не сме извиквали парсер,
+-- който да прочете останалата част от низа
 
 paren :: Parser Term
 paren = char '(' *> term <* char ')'
 
+-- >>> runParser paren "(Some_variable_here)"
+-- Right (Variable "Some_variable_here","")
+
+-- тъй като граматиката е ляво рекурсивна,
+-- бихме забили по парсването на левия операнд
+-- (ако имахме lhs <- term). затова първо ще
+-- се опитаме да парснем друг израз,
+-- правилото в граматиката за който не води
+-- до лява рекурсия (това е именно base в
+-- парсера term), и след това ще се опитаме
+-- да приложим по-комплексен парсер
+
+-- следните 3 парсерса се различават единствено
+-- по оператора, който разпознават, и са различни
+-- начини за написването на един и същи парсер
 conj :: Term -> Parser Term
 conj lhs = do
   _ <- char '&'
@@ -213,11 +258,21 @@ disj lhs = char '|' >> (lhs :|:) <$> term
 implies :: Term -> Parser Term
 implies lhs = fmap (lhs :=>:) $ char '=' >> char '>' >> term
 
+-- по-обобщена версия на комбинатора, който иначе би ни трябвал,
+-- за да осъществим по-горната идея. приемаме списък от функции,
+-- всяка от които приема някакъв аргумент (това ще бъде левия операнд)
+-- и връща парсер за останалата част от входния низ (такива елементи
+-- на списъка могат да бъдат горните 3 комбинатора), и стойност по
+-- подразбиране (отново левия операнд), понеже може нито един от
+-- парсерите в списъка да не успее - тогава връщаме тази стойност
 lr :: [a -> Parser a] -> a -> Parser a
 lr pfs x = foldr (<|>) (pure x) ps
-  where
-    ps = map ($ x) pfs
+ where
+  ps = map ($ x) pfs
 
+-- прочита всички интервали, като не ги добавя в
+-- резултата от парсера. в общия случай бихме искали
+-- да не добавяме и нови редове, табулации и т.н.
 token :: Parser a -> Parser a
 token p = many (char ' ') *> p <* many (char ' ')
 
@@ -253,6 +308,10 @@ term = do
 -- >>> runParser term "A => B 123"
 -- Right (Variable "A" :=>: Variable "B","123")
 
+-- примера от по-горе
+-- >>> runParser term "!Foo & Bar"
+-- Right (Not (Variable "Foo") :&: Variable "Bar","")
+
 type Context = [(String, Term)]
 
 -- този тип на функция не е най-добрият вариант,
@@ -274,23 +333,23 @@ type Context = [(String, Term)]
 --    и да имаме тип match :: Term Meta -> Term Concrete -> Bool
 match :: Term -> Term -> Bool
 match lhs' rhs' = evalState (go lhs' rhs') []
-  where
-    go :: Term -> Term -> State Context Bool
-    go (Variable x) rhs = do
-      ctx <- get
-      case find ((== x) . fst) ctx of
-        Just (_, y) -> pure $ rhs == y
-        Nothing -> modify ((x, rhs) :) >> pure True
-    go (Not lhs) (Not rhs) = go lhs rhs
-    go (lhs1 :&: rhs1) (lhs2 :&: rhs2) = do
-      res1 <- go lhs1 lhs2
-      res2 <- go rhs1 rhs2
-      pure $ res1 && res2
-    go (lhs1 :|: rhs1) (lhs2 :|: rhs2) =
-      liftA2 (&&) (go lhs1 lhs2) (go rhs1 rhs2)
-    go (lhs1 :=>: rhs1) (lhs2 :=>: rhs2) =
-      liftA2 (&&) (go lhs1 lhs2) (go rhs1 rhs2)
-    go _ _ = pure False
+ where
+  go :: Term -> Term -> State Context Bool
+  go (Variable x) rhs = do
+    ctx <- get
+    case find ((== x) . fst) ctx of
+      Just (_, y) -> pure $ rhs == y
+      Nothing -> modify ((x, rhs) :) >> pure True
+  go (Not lhs) (Not rhs) = go lhs rhs
+  go (lhs1 :&: rhs1) (lhs2 :&: rhs2) = do
+    res1 <- go lhs1 lhs2
+    res2 <- go rhs1 rhs2
+    pure $ res1 && res2
+  go (lhs1 :|: rhs1) (lhs2 :|: rhs2) =
+    liftA2 (&&) (go lhs1 lhs2) (go rhs1 rhs2)
+  go (lhs1 :=>: rhs1) (lhs2 :=>: rhs2) =
+    liftA2 (&&) (go lhs1 lhs2) (go rhs1 rhs2)
+  go _ _ = pure False
 
 parse :: String -> Either ParseError Term
 parse = (fst <$>) . runParser (term <* eof)
