@@ -42,10 +42,10 @@ front (MkQueue xs []) = Just $ let (y : _) = reverse xs in y
 front (MkQueue _ (y : _)) = Just y
 
 toList :: Queue a -> [a]
-toList (MkQueue s1 s2) = s1 ++ reverse s2
+toList (MkQueue s1 s2) = s2 ++ reverse s1
 
 fromList :: [a] -> Queue a
-fromList = foldr enqueue empty
+fromList = foldl (flip enqueue) empty
 
 instance Functor Queue where
   fmap f (MkQueue s1 s2) = MkQueue (fmap f s1) (fmap f s2)
